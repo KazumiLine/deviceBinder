@@ -18,10 +18,14 @@ func VerifyDeviceKey(baseUrl, fileKey string) error {
 		"pubKey": {base64.StdEncoding.EncodeToString(clientkey.publicKey[:])},
 	})
 	if err != nil || resp.StatusCode != 200 {
+		return fmt.Errorf("error:%#V", err)
+	}
+	serverKeyB64, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	serverKey, err := base64.StdEncoding.DecodeString(string(serverKeyB64))
+	if err != nil {
 		return err
 	}
-	serverKey, err := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
 	clientkey.generateSharedKey(serverKey)
 	deviceUUID, err := getDeviceUUID()
 	if err != nil {
@@ -36,13 +40,11 @@ func VerifyDeviceKey(baseUrl, fileKey string) error {
 		"message": {message},
 	})
 	if err != nil || resp.StatusCode != 200 {
-		return err
+		return fmt.Errorf("error:%#V", err)
 	}
 	respText, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
-	fmt.Println(string(respText))
 	if message, err = clientkey.decryptMessage(string(respText)); err != nil || message != "ok" {
-		fmt.Println(message, err)
 		return fmt.Errorf("server not verified")
 	}
 	return nil

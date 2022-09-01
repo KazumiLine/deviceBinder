@@ -24,7 +24,7 @@ type keyPair struct {
 
 func generateNewKeyPair() (key *keyPair, err error) {
 	key = new(keyPair)
-	key.nonce = make([]byte, 0)
+	key.nonce = make([]byte, 16)
 	_, err = rand.Reader.Read(key.nonce[:])
 	if err != nil {
 		return nil, err
@@ -98,11 +98,11 @@ func (key *keyPair) decryptMessage(cipherAndSignB64 string) (content string, err
 	masterKey := sha256.Sum256(append(append([]byte(serverKey), key.sharedKey[:]...), key.nonce...))
 	hmacKey := sha256.Sum256(append([]byte("hmac_key"), masterKey[:]...))
 	h := hmac.New(sha256.New, hmacKey[:])
-	h.Write(cipherAndSign[:16])
-	if !hmac.Equal(h.Sum(nil), cipherAndSign[16:]) {
+	h.Write(cipherAndSign[:len(cipherAndSign)-32])
+	if !hmac.Equal(h.Sum(nil), cipherAndSign[len(cipherAndSign)-32:]) {
 		return "", fmt.Errorf("invalid signature")
 	}
-	plainText, err := aesCBCDecrypt(cipherAndSign[:16], masterKey[:16], masterKey[16:32])
+	plainText, err := aesCBCDecrypt(cipherAndSign[:len(cipherAndSign)-32], masterKey[:16], masterKey[16:32])
 	if err != nil {
 		return
 	}

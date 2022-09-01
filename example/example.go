@@ -16,6 +16,8 @@ func startServer() {
 			pubkey, err := deviceBinder.HandleExchangeECDHKey(r.FormValue("keyID"), r.FormValue("pubKey"))
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Println(err)
+				w.Write([]byte(err.Error()))
 			} else {
 				w.Write([]byte(pubkey))
 			}
@@ -35,6 +37,8 @@ func startServer() {
 			respText, err := deviceBinder.HandleEncryptedMessage(r.FormValue("keyID"), r.FormValue("message"), checker)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Println(err)
+				w.Write([]byte(err.Error()))
 			} else {
 				w.Write([]byte(respText))
 			}
