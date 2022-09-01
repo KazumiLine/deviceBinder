@@ -14,10 +14,10 @@ func VerifyDeviceKey(baseUrl, fileKey string) error {
 		return err
 	}
 	resp, err := http.PostForm(baseUrl+"/exchange", url.Values{
-		"keyID":  {base64.RawStdEncoding.EncodeToString(clientkey.nonce)},
+		"keyID":  {base64.StdEncoding.EncodeToString(clientkey.nonce)},
 		"pubKey": {base64.StdEncoding.EncodeToString(clientkey.publicKey[:])},
 	})
-	if err != nil {
+	if err != nil || resp.StatusCode != 200 {
 		return err
 	}
 	serverKey, err := ioutil.ReadAll(resp.Body)
@@ -32,10 +32,10 @@ func VerifyDeviceKey(baseUrl, fileKey string) error {
 		return err
 	}
 	resp, err = http.PostForm(baseUrl+"/verify", url.Values{
-		"keyID":   {base64.RawStdEncoding.EncodeToString(clientkey.nonce)},
+		"keyID":   {base64.StdEncoding.EncodeToString(clientkey.nonce)},
 		"message": {message},
 	})
-	if err != nil {
+	if err != nil || resp.StatusCode != 200 {
 		return err
 	}
 	respText, err := ioutil.ReadAll(resp.Body)
