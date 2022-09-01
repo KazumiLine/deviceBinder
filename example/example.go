@@ -16,7 +16,6 @@ func startServer() {
 			pubkey, err := deviceBinder.HandleExchangeECDHKey(r.FormValue("keyID"), r.FormValue("pubKey"))
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Println(err)
 				w.Write([]byte(err.Error()))
 			} else {
 				w.Write([]byte(pubkey))
@@ -29,15 +28,15 @@ func startServer() {
 				data := strings.Split(message, "|")
 				if len(data) == 2 {
 					if uuid, ok := userData[data[0]]; !ok || uuid == data[1] {
+						userData[data[0]] = data[1]
 						return nil
 					}
 				}
-				return fmt.Errorf("already registered")
+				return fmt.Errorf("device already registered")
 			}
 			respText, err := deviceBinder.HandleEncryptedMessage(r.FormValue("keyID"), r.FormValue("message"), checker)
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Println(err)
 				w.Write([]byte(err.Error()))
 			} else {
 				w.Write([]byte(respText))

@@ -17,12 +17,15 @@ func VerifyDeviceKey(baseUrl, fileKey string) error {
 		"keyID":  {base64.StdEncoding.EncodeToString(clientkey.nonce)},
 		"pubKey": {base64.StdEncoding.EncodeToString(clientkey.publicKey[:])},
 	})
-	if err != nil || resp.StatusCode != 200 {
+	if err != nil {
 		return fmt.Errorf("error:%#V", err)
 	}
-	serverKeyB64, err := ioutil.ReadAll(resp.Body)
+	respText, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
-	serverKey, err := base64.StdEncoding.DecodeString(string(serverKeyB64))
+	if resp.StatusCode != 200 {
+		return fmt.Errorf(string(respText))
+	}
+	serverKey, err := base64.StdEncoding.DecodeString(string(respText))
 	if err != nil {
 		return err
 	}
@@ -39,12 +42,14 @@ func VerifyDeviceKey(baseUrl, fileKey string) error {
 		"keyID":   {base64.StdEncoding.EncodeToString(clientkey.nonce)},
 		"message": {message},
 	})
-	if err != nil || resp.StatusCode != 200 {
+	if err != nil {
 		return fmt.Errorf("error:%#V", err)
 	}
-	respText, err := ioutil.ReadAll(resp.Body)
+	respText, err = ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
-	if message, err = clientkey.decryptMessage(string(respText)); err != nil || message != "ok" {
+	if resp.StatusCode != 200 {
+		return fmt.Errorf(string(respText))
+	} else if message, err = clientkey.decryptMessage(string(respText)); err != nil || message != "ok" {
 		return fmt.Errorf("server not verified")
 	}
 	return nil
