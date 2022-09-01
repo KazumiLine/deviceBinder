@@ -68,12 +68,13 @@ http.HandleFunc("/verify", func(w http.ResponseWriter, r *http.Request) {
 
 ## Client Site
 You can make your own verify method.
-See [Client.go](https://github.com/KazumiLine/deviceBinder/blob/master/client.go)
+See [client.go](https://github.com/KazumiLine/deviceBinder/blob/master/client.go)
 Or Call `VerifyDeviceKey(Url, filename)` directly
 
 ## Some Util
 ```go=
 deviceBinder.GetDeviceUUID()
+
 keyPair, err := deviceBinder.GenerateNewKeyPair() (key *KeyPair, err error)
 keyPair.GenerateSharedKey(peersPublicKey []byte)
 
