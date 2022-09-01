@@ -6,6 +6,6 @@ import (
 )
 
 func TestGetUserDevice(t *testing.T) {
-	uuid, err := getDeviceUUID()
+	uuid, err := GetDeviceUUID()
 	fmt.Println(uuid, err)
 }

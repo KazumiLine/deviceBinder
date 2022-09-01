@@ -7,7 +7,7 @@ import (
 	"runtime"
 )
 
-func getDeviceUUID() (uuid string, err error) {
+func GetDeviceUUID() (uuid string, err error) {
 	osname := runtime.GOOS
 	var out []byte
 	if osname == "windows" {

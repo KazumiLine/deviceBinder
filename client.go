@@ -9,13 +9,13 @@ import (
 )
 
 func VerifyDeviceKey(baseUrl, fileKey string) error {
-	clientkey, err := generateNewKeyPair()
+	clientkey, err := GenerateNewKeyPair()
 	if err != nil {
 		return err
 	}
 	resp, err := http.PostForm(baseUrl+"/exchange", url.Values{
-		"keyID":  {base64.StdEncoding.EncodeToString(clientkey.nonce)},
-		"pubKey": {base64.StdEncoding.EncodeToString(clientkey.publicKey[:])},
+		"keyID":  {base64.StdEncoding.EncodeToString(clientkey.Nonce)},
+		"pubKey": {base64.StdEncoding.EncodeToString(clientkey.PublicKey[:])},
 	})
 	if err != nil {
 		return fmt.Errorf("error:%#V", err)
@@ -29,17 +29,17 @@ func VerifyDeviceKey(baseUrl, fileKey string) error {
 	if err != nil {
 		return err
 	}
-	clientkey.generateSharedKey(serverKey)
-	deviceUUID, err := getDeviceUUID()
+	clientkey.GenerateSharedKey(serverKey)
+	deviceUUID, err := GetDeviceUUID()
 	if err != nil {
 		return err
 	}
-	message, err := clientkey.encryptMessage(fileKey + "|" + deviceUUID)
+	message, err := clientkey.EncryptMessage(fileKey + "|" + deviceUUID)
 	if err != nil {
 		return err
 	}
 	resp, err = http.PostForm(baseUrl+"/verify", url.Values{
-		"keyID":   {base64.StdEncoding.EncodeToString(clientkey.nonce)},
+		"keyID":   {base64.StdEncoding.EncodeToString(clientkey.Nonce)},
 		"message": {message},
 	})
 	if err != nil {
@@ -49,7 +49,7 @@ func VerifyDeviceKey(baseUrl, fileKey string) error {
 	resp.Body.Close()
 	if resp.StatusCode != 200 {
 		return fmt.Errorf(string(respText))
-	} else if message, err = clientkey.decryptMessage(string(respText)); err != nil || message != "ok" {
+	} else if message, err = clientkey.DecryptMessage(string(respText)); err != nil || message != "ok" {
 		return fmt.Errorf("server not verified")
 	}
 	return nil
