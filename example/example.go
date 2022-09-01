@@ -32,7 +32,12 @@ func startServer() {
 				}
 				return fmt.Errorf("already registered")
 			}
-			deviceBinder.HandleEncryptedMessage(r.FormValue("keyID"), r.FormValue("message"), checker)
+			respText, err := deviceBinder.HandleEncryptedMessage(r.FormValue("keyID"), r.FormValue("message"), checker)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			} else {
+				w.Write([]byte(respText))
+			}
 		}
 	})
 	http.ListenAndServe(":8080", nil)

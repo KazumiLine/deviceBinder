@@ -24,6 +24,7 @@ type keyPair struct {
 
 func generateNewKeyPair() (key *keyPair, err error) {
 	key = new(keyPair)
+	key.nonce = make([]byte, 16)
 	_, err = rand.Reader.Read(key.nonce[:])
 	if err != nil {
 		return nil, err

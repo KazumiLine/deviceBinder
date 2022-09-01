@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
+	"net/url"
 )
 
-func VerifyDeviceKey(url, fileKey string) error {
+func VerifyDeviceKey(baseUrl, fileKey string) error {
 	clientkey, err := generateNewKeyPair()
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post(url, "application/x-www-form-urlencoded",
-		strings.NewReader("keyID="+base64.RawStdEncoding.EncodeToString(clientkey.nonce[:])+"&pubKey="+base64.StdEncoding.EncodeToString(clientkey.publicKey[:])))
+	resp, err := http.PostForm(baseUrl+"/exchange", url.Values{
+		"keyID":  {base64.RawStdEncoding.EncodeToString(clientkey.nonce)},
+		"pubKey": {base64.StdEncoding.EncodeToString(clientkey.publicKey[:])},
+	})
 	if err != nil {
 		return err
 	}
@@ -29,10 +31,18 @@ func VerifyDeviceKey(url, fileKey string) error {
 	if err != nil {
 		return err
 	}
-	resp, err = http.Post(url, "application/x-www-form-urlencoded", strings.NewReader("keyID="+base64.RawStdEncoding.EncodeToString(clientkey.nonce[:])+"&message="+message))
+	resp, err = http.PostForm(baseUrl+"/verify", url.Values{
+		"keyID":   {base64.RawStdEncoding.EncodeToString(clientkey.nonce)},
+		"message": {message},
+	})
+	if err != nil {
+		return err
+	}
 	respText, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
+	fmt.Println(string(respText))
 	if message, err = clientkey.decryptMessage(string(respText)); err != nil || message != "ok" {
+		fmt.Println(message, err)
 		return fmt.Errorf("server not verified")
 	}
 	return nil

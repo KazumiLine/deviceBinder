@@ -22,10 +22,12 @@ func HandleExchangeECDHKey(keyID, pubKeyB64 string) (serverKeyB64 string, err er
 	}
 	serverKey.generateSharedKey(pubKey)
 	keyPairsMap[keyID] = serverKey
+	fmt.Println(keyPairsMap)
 	return base64.StdEncoding.EncodeToString(serverKey.publicKey[:]), nil
 }
 
 func HandleEncryptedMessage(keyID, cipherText string, messageChecker func(data string) (err error)) (respText string, err error) {
+	fmt.Println(keyPairsMap)
 	if key, ok := keyPairsMap[keyID]; !ok {
 		return "", fmt.Errorf("can't find key")
 	} else {
